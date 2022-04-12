@@ -304,7 +304,11 @@ class ELF(object):
     def getExecSections(self):
         ret = []
         for segment in self.__phdr_l:
-            if segment.p_flags & 0x1:
+# from /usr/include/linux/elf.h
+#define PF_R            0x4
+#define PF_W            0x2
+#define PF_X            0x1
+            if segment.p_flags & (0x1 | 0x4):
                 ret +=  [{
                             "offset"  : segment.p_offset,
                             "size"    : segment.p_memsz,
