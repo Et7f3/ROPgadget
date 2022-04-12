@@ -10,6 +10,7 @@ import binascii
 import cmd
 import re
 import string
+import struct
 
 from capstone import CS_MODE_32
 
@@ -110,7 +111,7 @@ class Core(cmd.Cmd):
             insts = gadget.get("gadget", "")
             insts = " : {}".format(insts) if insts else ""
             bytesStr = " // " + binascii.hexlify(gadget["bytes"]).decode('utf8') if self.__options.dump else ""
-            print("0x{{0:0{}x}}{{1}}{{2}}".format(8 if arch == CS_MODE_32 else 16).format(vaddr, insts, bytesStr))
+            print("0x{{0:0{}x}} = {{1}}{{2}}{{3}}".format(8 if arch == CS_MODE_32 else 16).format(vaddr, struct.pack("<L", vaddr), insts, bytesStr))
 
         print("\nUnique gadgets found: %d" % (len(self.__gadgets)))
         return True
@@ -176,7 +177,7 @@ class Core(cmd.Cmd):
                 match = section["opcodes"][ref:ref + len(s)]
                 printable = string.printable.encode()
                 match = "".join((chr(m) if isinstance(m, int) else m) if m in printable else "." for m in match)
-                print("0x{{0:0{}x}} : {{1}}".format(8 if arch == CS_MODE_32 else 16).format(vaddr, match))
+                print("0x{{0:0{}x}} : {{1}}{{2}}".format(8 if arch == CS_MODE_32 else 16).format(vaddr, struct.pack("<L", vaddr), match))
         return True
 
     def __lookingForOpcodes(self, opcodes):
